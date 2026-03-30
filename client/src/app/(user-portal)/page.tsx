@@ -1,0 +1,683 @@
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { 
+  Search, 
+  MapPin, 
+  ChevronDown, 
+  Download, 
+  User, 
+  LogOut,
+  Smartphone,
+  Menu,
+  X,
+  Users,
+  Calendar,
+  IndianRupee,
+  CheckCircle2,
+  Star,
+  Quote,
+  ShieldCheck,
+  Zap,
+  Tag,
+  Clock,
+  ArrowRight,
+  Send,
+  Building2,
+  LayoutDashboard,
+  Heart,
+  Globe
+} from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+
+const AnimatedCounter = ({ end, duration = 2000, suffix = "" }: { end: number, duration?: number, suffix?: string }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-10px 0px" });
+
+  useEffect(() => {
+    if (isInView) {
+      let startTimestamp: number | null = null;
+      const step = (timestamp: number) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        setCount(Math.floor(progress * end));
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+  }, [isInView, end, duration]);
+
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+};
+
+export default function Home() {
+  const locationRef = useRef<HTMLDivElement>(null);
+
+  // Form States
+  const [formData, setFormData] = useState({
+    eventType: '',
+    city: '',
+    date: '',
+    guests: ''
+  });
+
+  const [locationInput, setLocationInput] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Fetch Location from Indian Post API
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (locationInput.length < 3) {
+        setSuggestions([]);
+        return;
+      }
+
+      setIsLoadingLocations(true);
+      try {
+        const isPincode = /^\d+$/.test(locationInput);
+        const url = isPincode 
+          ? `https://api.postalpincode.in/pincode/${locationInput}`
+          : `https://api.postalpincode.in/postoffice/${locationInput}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data[0].Status === 'Success') {
+          const offices = data[0].PostOffice;
+          const formattedSuggestions = offices.map((office: any) => ({
+            display: `${office.Name}-${office.Pincode}`,
+            name: office.Name,
+            pincode: office.Pincode,
+            district: office.District,
+            state: office.State
+          }));
+          // Remove duplicates
+          const uniqueSuggestions = Array.from(new Set(formattedSuggestions.map((s: any) => s.display)))
+            .map(display => formattedSuggestions.find((s: any) => s.display === display));
+          
+          setSuggestions(uniqueSuggestions);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+        setSuggestions([]);
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchLocations, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [locationInput]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const categories = [
+    { name: "Birthday Party", icon: "🎂", img: "/categories/birthday.png" },
+    { name: "Wedding Events", icon: "💍", img: "/categories/wedding.png" },
+    { name: "Pre-Wedding Events", icon: "✨", img: "/categories/wedding.png" },
+    { name: "Anniversary Party", icon: "🥂", img: "/categories/festival.png" },
+    { name: "Corporate Events", icon: "🏢", img: "/categories/corporate.png" },
+    { name: "Kitty Party", icon: "👩‍🤝‍👩", img: "/categories/bachelor.png" },
+    { name: "Family Functions", icon: "🏠", img: "/categories/kids.png" },
+    { name: "Festival Parties", icon: "🎭", img: "/categories/festival.png" },
+    { name: "Social Gatherings", icon: "🎉", img: "/categories/festival.png" },
+    { name: "Kids Parties", icon: "🎈", img: "/categories/kids.png" },
+    { name: "Bachelor / Bachelorette Party", icon: "🕺", img: "/categories/bachelor.png" },
+    { name: "Housewarming Party", icon: "🏡", img: "/categories/corporate.png" },
+    { name: "Baby Shower", icon: "🧸", img: "/categories/baby-shower.png" },
+    { name: "Engagement Ceremony", icon: "💎", img: "/categories/wedding.png" },
+    { name: "Entertainment / Theme Parties", icon: "🦁", img: "/categories/kids.png" }
+  ];
+
+  const venues = [
+    {
+      name: "The Royal Ballroom",
+      location: "South Delhi",
+      capacity: "500-800",
+      price: "₹1,800",
+      rating: 4.8,
+      reviews: 124,
+      img: "/venues/royal-ballroom.png"
+    },
+    {
+      name: "Grand Palace Hotel",
+      location: "Dwarka, Delhi",
+      capacity: "200-500",
+      price: "₹2,500",
+      rating: 4.9,
+      reviews: 89,
+      img: "/venues/palace-hotel.png"
+    },
+    {
+      name: "Oceanic Resort",
+      location: "Goa (NCR Office)",
+      capacity: "1000+",
+      price: "₹3,200",
+      rating: 4.7,
+      reviews: 210,
+      img: "/venues/oceanic-resort.png"
+    }
+  ];
+
+  const steps = [
+    { title: "Submit Requirement", desc: "Tell us about your event type, guest count, and budget.", icon: <Send className="text-white" size={24} /> },
+    { title: "Receive Quotes", desc: "Top venues will send you customized quotes in minutes.", icon: <Tag className="text-white" size={24} /> },
+    { title: "Book Venue", desc: "Compare venues, check availability, and book your favorite.", icon: <CheckCircle2 className="text-white" size={24} /> }
+  ];
+
+  const benefits = [
+    { name: "Verified Venues", desc: "Every venue on our list is personally verified.", icon: <ShieldCheck size={32} /> },
+    { name: "Instant Quotes", desc: "No more long wait times for price sheets.", icon: <Zap size={32} /> },
+    { name: "Best Price Guarantee", desc: "We ensure you get the most competitive rates.", icon: <IndianRupee size={32} /> },
+    { name: "Free Assistance", desc: "Our expert planners help you decide for free.", icon: <Star size={32} /> }
+  ];
+
+
+  return (
+    <main className="min-h-screen">
+      {/* HERO SECTION */}
+      <section className="relative pt-16 pb-16 px-6 bg-white border-b border-slate-50">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            {/* Hero Text */}
+            <div className="w-full lg:w-1/2 text-left">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <h1 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight mb-6">
+                  Find the <span className="text-pd-red">Perfect Venue</span> for Your Event
+                </h1>
+                <p className="text-lg text-slate-500 mb-8 leading-relaxed">
+                  Get free customized quotes from top venues in minutes. 
+                  Direct connections. Zero brokerage.
+                </p>
+                <div className="flex items-center gap-4 text-sm font-bold text-slate-800">
+                  <div className="flex -space-x-2">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+                        <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
+                      </div>
+                    ))}
+                  </div>
+                  <span>Trusted by 50,000+ happy hosts</span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Lead Form */}
+            <div className="w-full lg:w-1/2">
+               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 md:p-10 rounded-[20px] shadow-pd-strong border border-slate-50">
+                  <h3 className="text-xl font-black text-slate-900 mb-8 border-l-4 border-pd-red pl-4">Get Free Quotes Now</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Event Type</label>
+                      <div className="relative">
+                        <select className="w-full h-14 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-800 outline-none focus:border-pd-purple transition-all appearance-none cursor-pointer">
+                          {categories.map((cat, i) => (
+                            <option key={i}>{cat.name}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-5 text-slate-400" size={16} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">City / Location</label>
+                      <div className="relative" ref={locationRef}>
+                        <MapPin className="absolute left-4 top-5 text-pd-red" size={16} />
+                        <input 
+                          type="text" 
+                          placeholder="Enter Pincode or City" 
+                          value={locationInput}
+                          onChange={(e) => {
+                            setLocationInput(e.target.value);
+                            setShowSuggestions(true);
+                          }}
+                          onFocus={() => setShowSuggestions(true)}
+                          className="w-full h-14 bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-bold text-slate-800 outline-none focus:border-pd-purple transition-all" 
+                        />
+                        
+                        {/* Suggestions Dropdown */}
+                        <AnimatePresence>
+                          {showSuggestions && (locationInput.length >= 3) && (suggestions.length > 0 || isLoadingLocations) && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 5 }}
+                              className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-pd-strong z-50 max-h-60 overflow-y-auto"
+                            >
+                              {isLoadingLocations ? (
+                                <div className="p-4 text-center text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">
+                                  Searching...
+                                </div>
+                              ) : (
+                                suggestions.map((s: any, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => {
+                                      setLocationInput(s.display);
+                                      setShowSuggestions(false);
+                                      setFormData({ ...formData, city: s.display });
+                                    }}
+                                    className="w-full text-left px-5 py-3.5 hover:bg-slate-50 text-sm font-bold text-slate-700 transition-colors border-b border-slate-50 last:border-none flex items-center justify-between"
+                                  >
+                                    <span>{s.display}</span>
+                                    <span className="text-[10px] text-slate-400 uppercase">{s.state}</span>
+                                  </button>
+                                ))
+                              )}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Event Date</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-5 text-pd-purple" size={16} />
+                        <input type="date" className="w-full h-14 bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-bold text-slate-800 outline-none focus:border-pd-purple transition-all" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Guest Count</label>
+                      <div className="relative">
+                        <Users className="absolute left-4 top-5 text-pd-blue" size={16} />
+                        <input type="number" placeholder="e.g. 200" className="w-full h-14 bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-bold text-slate-800 outline-none focus:border-pd-purple transition-all" />
+                      </div>
+                    </div>
+
+                  </div>
+                  <button className="w-full pd-btn-primary h-16 mt-8 shadow-xl shadow-pd-pink/20 uppercase tracking-[0.2em] font-black italic">
+                    Get Free Quotes <ArrowRight className="inline ml-2" size={18} />
+                  </button>
+               </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* COMPACT STATS BAR - Optimized for single-screen visibility */}
+      <section className="py-6 border-y border-slate-50 bg-white/80 backdrop-blur-sm relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-3 divide-x divide-slate-100">
+            
+            {/* Stat Item 1 */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="flex flex-col items-center justify-center text-center gap-2 px-1"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-pd-red/5 flex items-center justify-center text-pd-red shrink-0 mb-1">
+                 <Building2 size={16} className="md:size-[18px]" />
+              </div>
+              <div>
+                 <h3 className="text-sm md:text-xl font-black text-slate-900 tracking-tight leading-none mb-1">
+                   <AnimatedCounter end={500} suffix="+" />
+                 </h3>
+                 <p className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Venues</p>
+              </div>
+            </motion.div>
+            
+            {/* Stat Item 2 */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="flex flex-col items-center justify-center text-center gap-2 px-1"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-pd-purple/5 flex items-center justify-center text-pd-purple shrink-0 mb-1">
+                 <Users size={16} className="md:size-[18px]" />
+              </div>
+              <div>
+                 <h3 className="text-sm md:text-xl font-black text-slate-900 tracking-tight leading-none mb-1">
+                   <AnimatedCounter end={10000} suffix="+" />
+                 </h3>
+                 <p className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Inquiries</p>
+              </div>
+            </motion.div>
+            
+            {/* Stat Item 3 */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col items-center justify-center text-center gap-2 px-1"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-pd-blue/5 flex items-center justify-center text-pd-blue shrink-0 mb-1">
+                 <Globe size={16} className="md:size-[18px]" />
+              </div>
+              <div>
+                 <h3 className="text-sm md:text-xl font-black text-slate-900 tracking-tight leading-none mb-1">
+                   <AnimatedCounter end={7} suffix="" />
+                 </h3>
+                 <p className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Cities</p>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* POPULAR CATEGORIES */}
+      <section className="py-16 px-6 bg-white border-t border-slate-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Popular Event Categories</h2>
+              <div className="w-12 h-1 bg-pd-red rounded-full"></div>
+            </div>
+            <Link href="/categories">
+              <button className="pd-btn-primary !py-3 !px-8 text-xs italic uppercase tracking-[0.2em] shadow-lg shadow-pd-pink/10">
+                Explore More <ArrowRight className="inline ml-2" size={16} />
+              </button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {categories.map((cat, i) => (
+              <Link href={`/categories?type=${cat.name.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
+                <div className="border border-slate-100 rounded-lg overflow-hidden h-64 relative group cursor-pointer">
+                  <Image src={cat.img} alt={cat.name} fill className="object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-black/40"></div>
+                  <div className="absolute bottom-4 left-4">
+                    <h3 className="text-white font-bold text-xs uppercase tracking-wider">{cat.name}</h3>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TOP VENUES NEAR YOU */}
+      <section className="py-24 px-6 bg-slate-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6 text-center md:text-left">
+            <div>
+              <h2 className="text-4xl font-black text-slate-900 mb-4">Top Venues <span className="pd-gradient-text">Near You</span></h2>
+              <p className="text-slate-500 font-medium">Personally verified luxury venues for your grand celebrations.</p>
+            </div>
+            <Link href="/venues">
+              <button className="bg-white px-8 py-3 rounded-xl font-bold text-sm border border-slate-200 hover:shadow-pd-soft transition-all uppercase tracking-widest text-slate-600">
+                View All Venues
+              </button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {venues.map((venue, i) => (
+              <motion.div key={i} className="pd-card group overflow-hidden bg-white">
+                <div className="h-56 relative overflow-hidden">
+                  <Image src={venue.img} alt={venue.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm">
+                    <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                    <span className="text-xs font-black text-slate-800">{venue.rating}</span>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    <MapPin size={12} className="text-pd-red" /> {venue.location}
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900 mb-4">{venue.name}</h3>
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
+                      <p className="text-sm font-black text-slate-700">{venue.capacity} Pax</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Veg Price</p>
+                      <p className="text-sm font-black text-pd-pink">{venue.price} <span className="text-[10px] text-slate-400">/plate</span></p>
+                    </div>
+                  </div>
+                  <button className="w-full mt-6 py-3 border border-pd-purple/20 rounded-xl text-pd-purple font-black text-[11px] uppercase tracking-widest hover:bg-pd-purple hover:text-white transition-all">
+                    Show Phone Number
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="py-24 px-6 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-4xl font-black text-slate-900 mb-20 uppercase">How it <span className="pd-gradient-text">Works</span></h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 relative">
+             <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-0.5 bg-slate-100 border-dashed border-b-2"></div>
+             {steps.map((step, i) => (
+               <div key={i} className="flex flex-col items-center relative z-10">
+                  <div className="w-24 h-24 rounded-full pd-gradient flex items-center justify-center mb-10 shadow-xl shadow-pd-pink/20 scale-110 active:scale-95 transition-transform">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 mb-4">{step.title}</h3>
+                  <p className="text-slate-500 font-medium max-w-xs mx-auto leading-relaxed">{step.desc}</p>
+               </div>
+             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHY CHOOSE US */}
+      <section className="py-24 px-6 bg-slate-900 text-white relative">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {benefits.map((benefit, i) => (
+              <div key={i} className="flex flex-col items-center group">
+                <div className="mb-8 text-pd-pink group-hover:scale-110 transition-transform duration-500">
+                  {benefit.icon}
+                </div>
+                <h3 className="text-lg font-black uppercase tracking-widest mb-4 group-hover:text-pd-blue transition-colors">{benefit.name}</h3>
+                <p className="text-slate-400 font-medium text-sm leading-relaxed">{benefit.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-32 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-black text-[#0F172A] mb-4">Happy <span className="pd-gradient-text">Celebrators</span></h2>
+            <p className="text-slate-400 uppercase tracking-widest font-black text-[10px]">Real stories from our valued clients</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1,2,3].map(i => (
+              <div key={i} className="pd-card p-10 bg-slate-50 relative">
+                <Quote className="absolute top-6 right-8 text-slate-200" size={40} />
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-14 h-14 rounded-full bg-slate-300 overflow-hidden ring-4 ring-white shadow-sm">
+                    <img src={`https://i.pravatar.cc/150?u=user${i}`} alt="user" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-slate-900 text-sm italic">Rahul Malhotra</h4>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest underline decoration-pd-red decoration-2">Wedding Host</p>
+                  </div>
+                </div>
+                <p className="text-slate-600 font-medium leading-relaxed italic">
+                  "PartyDial made our wedding planning so much easier! We received 5 quotes within 2 hours and booked a beautiful palace hotel that was right in our budget. Highly recommended!"
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section className="py-24 px-6 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-black text-slate-900 mb-4 uppercase italic">Got <span className="pd-gradient-text">Questions?</span></h2>
+            <div className="w-20 h-1.5 bg-pd-red mx-auto rounded-full mb-6"></div>
+            <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">Everything you need to know about planning your next event</p>
+          </div>
+          
+          <div className="space-y-4">
+            {[
+              { q: "How does PartyDial help me find the right venue?", a: "We match you with the best venues based on your event type, guest count, and budget. You receive real-time quotes and can compare amenities and pricing instantly." },
+              { q: "Is there any charge for using PartyDial services?", a: "No, PartyDial is completely free for event organizers. We connect you directly with venues without any brokerage or hidden convenience fees." },
+              { q: "Are the venues on PartyDial personally verified?", a: "Yes, our team personally visits and verifies each venue for quality standards, amenities, and credibility before listing them on our platform." },
+              { q: "How soon will I receive quotes for my requirement?", a: "Most users receive their first set of personalized quotes within 30-60 minutes of submitting their requirements." },
+              { q: "Can I book a site visit through the platform?", a: "Absolutely! Once you receive a quote you like, you can directly message the venue manager or request a free site visit through our 'Help Desk'." }
+            ].map((faq, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-pd-soft transition-shadow"
+              >
+                <button 
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)} 
+                  className="w-full text-left px-8 py-7 flex items-center justify-between group"
+                >
+                  <span className="font-black text-slate-700 text-lg group-hover:text-pd-red transition-colors pr-8 leading-tight">{faq.q}</span>
+                  <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${openFaq === i ? 'bg-pd-red text-white -rotate-180' : 'bg-slate-50 text-slate-400 group-hover:bg-pd-red group-hover:text-white'}`}>
+                    <ChevronDown size={18} />
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <div className="px-8 pb-7 border-t border-slate-50 pt-6">
+                        <p className="text-slate-500 font-medium leading-relaxed italic border-l-4 border-pd-red/20 pl-6">{faq.a}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+      {/* FINAL CTA - Compact version */}
+      <section className="py-12 px-6 md:px-0 bg-slate-50">
+        <div className="max-w-6xl mx-auto overflow-hidden">
+          <div className="pd-gradient p-8 md:p-16 rounded-[40px] text-white flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16 shadow-[0_32px_80px_-16px_rgba(239,68,68,0.3)] relative">
+             <div className="text-center md:text-left relative z-10 w-full md:w-auto">
+                <h2 className="text-3xl md:text-6xl font-black leading-tight mb-4 md:mb-6 uppercase italic tracking-tighter">Ready to Plan the <br className="hidden md:block" /> Grand <span className="text-slate-900/10">Celebration?</span></h2>
+                <p className="text-sm md:text-xl font-medium text-white/80 max-w-xl mb-8 md:mb-10">Submit your requirements and get free quotes from 5,000+ luxury venues near you.</p>
+                <div className="flex flex-col items-center md:items-start gap-4">
+                  <button 
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-inquiry-popup'))}
+                    className="w-full md:w-auto bg-white text-slate-900 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-50 transition-all shadow-xl active:scale-95"
+                  >
+                    Submit Requirement <ChevronDown className="inline ml-2 -rotate-90" size={20} />
+                  </button>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-white/50">Average Response Time: 15 Mins</p>
+                </div>
+             </div>
+             
+             {/* Optimized decorative cluster for mobile */}
+             <div className="relative w-48 h-48 md:w-96 md:h-96 opacity-20 md:opacity-100 group shrink-0">
+                <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl" />
+                <LayoutDashboard size={200} className="md:size-[300px] text-white group-hover:rotate-12 transition-transform duration-700" strokeWidth={1} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Heart size={50} className="md:size-[80px] text-white fill-white animate-bounce" />
+                </div>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* POPULAR CITIES DIRECTORY (pSEO Hub) */}
+      <section className="py-24 px-6 bg-white border-t border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 px-4">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl md:text-4xl font-black text-slate-900 mb-4 uppercase italic"
+            >
+              Browse by <span className="pd-gradient-text">City</span>
+            </motion.h2>
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: 80 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="h-1.5 bg-pd-red mx-auto rounded-full mb-6"
+            ></motion.div>
+            <p className="text-slate-500 font-medium max-w-2xl mx-auto">Find the best event services in your city</p>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-x-8 gap-y-12">
+            {["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Pune", "Chennai", "Kolkata", "Ahmedabad", "Gurgaon", "Noida", "Jaipur", "Lucknow", "Chandigarh", "Indore", "Surat", "Patna", "Nagpur", "Vadodara"].map((city, idx) => (
+              <motion.div 
+                key={city} 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: (idx % 6) * 0.1 }}
+                className="flex flex-col gap-4 group"
+              >
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-50 group-hover:border-pd-red/20 transition-colors">
+                  <div className="w-1.5 h-1.5 rounded-full bg-pd-red opacity-40 group-hover:opacity-100 transition-opacity"></div>
+                  <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.15em]">{city}</h4>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Link href={`/${city.toLowerCase()}/banquet-halls`} className="text-[11px] font-bold text-slate-400 hover:text-pd-red transition-all flex items-center gap-2 group/link uppercase tracking-wider">
+                    <span className="w-1 h-px bg-slate-200 group-hover/link:w-3 group-hover/link:bg-pd-red transition-all"></span>
+                    Banquet Halls
+                  </Link>
+                  <Link href={`/${city.toLowerCase()}/wedding-venues`} className="text-[11px] font-bold text-slate-400 hover:text-pd-red transition-all flex items-center gap-2 group/link uppercase tracking-wider">
+                    <span className="w-1 h-px bg-slate-200 group-hover/link:w-3 group-hover/link:bg-pd-red transition-all"></span>
+                    Wedding Venues
+                  </Link>
+                  <Link href={`/${city.toLowerCase()}/party-lawns`} className="text-[11px] font-bold text-slate-400 hover:text-pd-red transition-all flex items-center gap-2 group/link uppercase tracking-wider">
+                    <span className="w-1 h-px bg-slate-200 group-hover/link:w-3 group-hover/link:bg-pd-red transition-all"></span>
+                    Party Lawns
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-20 p-8 md:p-14 bg-slate-50 rounded-[2.5rem] md:rounded-[4rem] border border-slate-100 text-center relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <MapPin size={80} className="text-pd-red" />
+            </div>
+            <h5 className="text-[10px] font-black uppercase tracking-[0.3em] text-pd-red mb-6">Explore All Locations</h5>
+            <p className="text-[11px] md:text-[12px] font-bold text-slate-500 uppercase tracking-widest leading-[2.2] relative z-10 max-w-5xl mx-auto">
+              Serving 1000+ Locations including Kanpur, Bhopal, Visakhapatnam, Pimpri-Chinchwad, Ghaziabad, Ludhiana, Agra, Nashik, Faridabad, Meerut, Rajkot, Varanasi, Srinagar, Aurangabad, Dhanbad, Amritsar, Navi Mumbai, Allahabad, Ranchi, Howrah, Coimbatore, Jabalpur, Gwalior, Vijayawada, Jodhpur, Madurai, Raipur, Kota, Guwahati, Solapur, Bareilly, Moradabad, Mysore, Gurgaon, Aligarh, Jalandhar, Bhubaneswar, Salem, Warangal, and many more.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+    </main>
+  );
+}
