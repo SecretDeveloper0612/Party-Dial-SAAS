@@ -47,19 +47,41 @@ export default function CompleteProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Get user from local storage
-    const userJson = localStorage.getItem('user');
-    if (!userJson) {
-      router.push('/login');
-      return;
-    }
-    const user = JSON.parse(userJson);
-    setUserData(user);
+    // 1. Get user from local storage or recover from Appwrite session
+    const checkUser = async () => {
+      let user = null;
+      const userJson = localStorage.getItem('user');
+
+      if (userJson) {
+        user = JSON.parse(userJson);
+      } else {
+        // Try to recover session from Appwrite (e.g., after Google OAuth)
+        try {
+          const { account } = await import('@/lib/appwrite');
+          const currentAccount = await account.get();
+          if (currentAccount) {
+            user = currentAccount;
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('auth_session', 'recovered-from-google'); // Mark as logged in
+          }
+        } catch (err) {
+          console.error('Session recovery failed:', err);
+        }
+      }
+
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+
+      setUserData(user);
+      fetchProfile(user.$id);
+    };
 
     // 2. Fetch current profile from backend
-    const fetchProfile = async () => {
+    const fetchProfile = async (userId: string) => {
       try {
-        const response = await fetch(`http://localhost:5000/api/data/party-dial?userId=${user.$id}`);
+        const response = await fetch(`http://127.0.0.1:5000/api/data/party-dial?userId=${userId}`);
         const result = await response.json();
         
         if (response.ok && result.data && result.data.length > 0) {
@@ -71,6 +93,9 @@ export default function CompleteProfilePage() {
              const amenities = Array.isArray(profile.amenities) ? profile.amenities : JSON.parse(profile.amenities);
              setSelectedAmenities(amenities);
           }
+        } else {
+           // If no profile found, we might need to create one, but for now we expect the backend to have created it during register
+           console.log('No profile found for user:', userId);
         }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
@@ -79,8 +104,8 @@ export default function CompleteProfilePage() {
       }
     };
 
-    fetchProfile();
-  }, []);
+    checkUser();
+  }, [router]);
 
   const toggleAmenity = (id: string) => {
     setSelectedAmenities(prev => 

@@ -34,7 +34,7 @@ const venueTypes = [
 ];
 
 const capacityRanges = [
-  "50-100", "100-200", "200-500", "500-1000", "1000+"
+  "0-50", "50-100", "100-200", "200-500", "500-1000", "1000-2000", "2000-5000", "5000+"
 ];
 
 export default function VenueSignupPage() {
@@ -80,7 +80,7 @@ export default function VenueSignupPage() {
             const postOffice = data[0].PostOffice[0];
             setFormData(prev => ({
               ...prev,
-              city: postOffice.District,
+              city: postOffice.Block && postOffice.Block !== "NA" ? postOffice.Block : postOffice.District,
               state: postOffice.State
             }));
             // Clear errors for city/state if any

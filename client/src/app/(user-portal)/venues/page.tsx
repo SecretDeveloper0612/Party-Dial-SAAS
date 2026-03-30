@@ -114,9 +114,61 @@ export default function VenuesPage() {
     return () => clearTimeout(debounceTimer);
   }, [locationSearchQuery]);
 
+  const [liveVenues, setLiveVenues] = useState<any[]>([]);
+  const [isLiveLoading, setIsLiveLoading] = useState(true);
+
+  // --- FETCH LIVE VENUES ---
+  useEffect(() => {
+    const fetchLive = async () => {
+      try {
+        const { databases } = await import('@/lib/appwrite');
+        const result = await databases.listDocuments('partydial_main_db', 'venues_profile');
+        
+        const mapped = result.documents.map(doc => {
+          // Attempt to parse capacity range to a number (use the lower bound)
+          let parsedCapacity = 0;
+          if (doc.capacity) {
+            const match = doc.capacity.match(/\d+/);
+            if (match) parsedCapacity = parseInt(match[0]);
+          }
+
+          return {
+            id: doc.$id,
+            name: doc.venueName || "Unnamed Venue",
+            location: doc.landmark || doc.city || "India",
+            city: doc.city || "Unknown",
+            type: doc.venueType || "Banquet Hall",
+            capacity: parsedCapacity,
+            price: 1500, // Default price as pricing is not in current profile attributes
+            rating: 4.5, // New venues start with default high rating
+            reviews: 0,
+            img: "/venues/palace-hotel.png", // Default image
+            verified: false,
+            popular: false,
+            isNew: true,
+            bestValue: false,
+            amenities: doc.amenities ? (typeof doc.amenities === 'string' ? JSON.parse(doc.amenities) : doc.amenities) : [],
+            categories: ["Wedding Events", "Engagement Ceremony"],
+            foodTypes: ["Veg", "Non-Veg", "Both"]
+          };
+        });
+
+        setLiveVenues(mapped);
+      } catch (err) {
+        console.error('Failed to fetch live venues:', err);
+      } finally {
+        setIsLiveLoading(false);
+      }
+    };
+
+    fetchLive();
+  }, []);
+
   // --- FILTER LOGIC ---
+  const allVenues = useMemo(() => [...liveVenues, ...MOCK_VENUES], [liveVenues]);
+
   const filteredVenues = useMemo(() => {
-    return MOCK_VENUES.filter(venue => {
+    return allVenues.filter(venue => {
       // Adjusted City Filtering for higher default visibility
       if (selectedCity && selectedCity !== "All Cities") {
         const cityOnly = selectedCity.split('-')[0].toLowerCase();
@@ -148,7 +200,7 @@ export default function VenuesPage() {
       if (sortBy === "Top Rated") return b.rating - a.rating;
       return (b.popular ? 1 : 0) - (a.popular ? 1 : 0);
     });
-  }, [selectedCity, selectedEvent, selectedVenueTypes, budgetRange, selectedCapacity, selectedAmenities, foodPreference, minRating, quickFilters, sortBy, locationSearchQuery]);
+  }, [allVenues, selectedCity, selectedEvent, selectedVenueTypes, budgetRange, selectedCapacity, selectedAmenities, foodPreference, minRating, quickFilters, sortBy]);
 
   const clearFilters = () => {
     setSelectedCity("All Cities");

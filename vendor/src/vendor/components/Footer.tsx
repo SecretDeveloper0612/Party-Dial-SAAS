@@ -1,16 +1,25 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Target, MessageSquare, ShieldCheck, Zap } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer suppressHydrationWarning className="bg-slate-900 pt-20 pb-10 px-6 text-white">
+    <footer suppressHydrationWarning className="bg-slate-900 pt-20 pb-10 px-6 text-white text-center">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
-          <div className="space-y-6">
-            <div className="text-2xl font-black italic">
-              PartyDial <span className="text-pd-red text-sm uppercase tracking-widest not-italic">Partner</span>
+          <div className="space-y-6 flex flex-col items-center md:items-start">
+            <div className="flex items-center gap-3">
+              <Image 
+                src="/logo.png" 
+                alt="PartyDial" 
+                width={120} 
+                height={40} 
+                className="h-8 w-auto object-contain" 
+              />
+              <div className="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
+              <span className="text-pd-red text-xs font-black uppercase tracking-widest">Partner</span>
             </div>
-            <p className="text-slate-400 text-sm font-medium leading-relaxed">
+            <p className="max-w-[280px] text-slate-400 text-sm font-medium leading-relaxed">
               Empowering venues and event partners with high-quality leads and smart management tools.
             </p>
           </div>
@@ -46,8 +55,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">© 2026 PartyDial Technologies Pvt Ltd.</p>
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">© 2026 PartyDial</p>
+            <div className="hidden md:block w-px h-3 bg-white/10"></div>
+            <p className="text-[10px] font-black text-pd-red uppercase tracking-[0.2em]">A Platform by Preet Tech OPC PVT. LTD.</p>
+            <div className="hidden md:block w-px h-3 bg-white/10"></div>
+            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest italic">All billing and operations managed exclusively by Preet Tech</p>
+          </div>
           <div className="flex gap-8">
             <Zap size={18} className="text-white/20" />
             <Target size={18} className="text-white/20" />

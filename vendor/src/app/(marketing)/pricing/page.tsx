@@ -17,13 +17,17 @@ import {
   MessageSquare,
   ArrowRight,
   Star,
-  Plus
+  Plus,
+  Sparkle,
+  CheckCircle2,
+  ChevronRight,
+  Eye
 } from 'lucide-react';
 
 // --- STYLES ---
 
 const gradientStyle = "bg-gradient-to-r from-red-500 via-pink-500 via-purple-500 to-blue-500";
-const textGradientStyle = "bg-gradient-to-r from-red-500 via-pink-500 via-purple-500 to-blue-500 bg-clip-text text-fill-transparent text-transparent";
+const textGradientStyle = "bg-gradient-to-r from-red-500 via-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent";
 
 // --- DATA ---
 
@@ -33,7 +37,7 @@ const pricingPlans = [
     name: "0–50 PAX",
     mrp: 15000,
     price: 12000,
-    leads: "20–30 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Basic visibility", "Standard listing", "Lead notifications", "Email support"],
     popular: false,
     cta: "Get Started"
@@ -43,7 +47,7 @@ const pricingPlans = [
     name: "50–100 PAX",
     mrp: 20000,
     price: 16000,
-    leads: "30–50 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Improved visibility", "WhatsApp alerts", "Standard placement", "Basic analytics"],
     popular: false,
     cta: "Get Started"
@@ -53,7 +57,7 @@ const pricingPlans = [
     name: "100–200 PAX",
     mrp: 35000,
     price: 28000,
-    leads: "60–90 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Priority listing", "WhatsApp notifications", "Lead insights dashboard", "Faster lead delivery"],
     popular: true,
     cta: "Get Started"
@@ -63,7 +67,7 @@ const pricingPlans = [
     name: "200–500 PAX",
     mrp: 57000,
     price: 45000,
-    leads: "100–140 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Featured placement", "Priority visibility", "Lead filtering", "Priority support"],
     popular: false,
     cta: "Get Started"
@@ -73,7 +77,7 @@ const pricingPlans = [
     name: "500–1000 PAX",
     mrp: 80000,
     price: 65000,
-    leads: "150–220 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Premium placement", "High visibility", "Faster response routing", "Support assistance"],
     popular: false,
     cta: "Get Started"
@@ -83,7 +87,7 @@ const pricingPlans = [
     name: "1000–2000 PAX",
     mrp: 110000,
     price: 90000,
-    leads: "220–300 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Top city visibility", "Premium ranking", "Lead analytics", "Priority handling"],
     popular: false,
     cta: "Get Started"
@@ -93,17 +97,17 @@ const pricingPlans = [
     name: "2000–5000 PAX",
     mrp: 180000,
     price: 140000,
-    leads: "300–450 verified leads/month",
+    leads: "Unlimited Leads",
     features: ["High priority ranking", "Dedicated support", "Advanced analytics", "Premium distribution"],
     popular: false,
     cta: "Get Started"
   },
   {
     id: 8,
-    name: "5000+ PAX (ENTERPRISE)",
+    name: "5000+ PAX",
     mrp: 300000,
     price: 220000,
-    leads: "500+ verified leads/month",
+    leads: "Unlimited Leads",
     features: ["Exclusive leads", "Dedicated account manager", "Custom promotions", "Highest visibility"],
     popular: false,
     cta: "Contact Sales"
@@ -111,11 +115,26 @@ const pricingPlans = [
 ];
 
 const faqs = [
-  { question: "How are leads generated?", answer: "Leads are generated through our targeted marketing funnel and venue discovery platform where active customers search for event spaces." },
-  { question: "Are leads verified?", answer: "Yes, every lead is pre-qualified with contact verification and event intent check before reaching your dashboard." },
-  { question: "Can I upgrade anytime?", answer: "Absolutely. You can upgrade your capacity plan at any time through your partner portal with pro-rated pricing." },
-  { question: "How quickly will I receive leads?", answer: "Inquiries are delivered in real-time via WhatsApp and Lead Dashboard instantly as customers submit them." },
-  { question: "Is support available?", answer: "Yes, we provide email/chat support for all plans, and dedicated account managers for premium tiers." }
+  { 
+    id: "01",
+    question: "How do I list my venue?", 
+    answer: "Listing is simple. Create your partner account, upload high-quality photos of your space, define your PAX capacity, and set your base pricing. Our team will verify your listing within 24 hours." 
+  },
+  { 
+    id: "02",
+    question: "How do I receive leads?", 
+    answer: "Once listed, your venue appears in searches. When a customer shows interest, you'll get an instant WhatsApp notification and the lead will appear in your real-time dashboard." 
+  },
+  { 
+    id: "03",
+    question: "Can I update pricing?", 
+    answer: "Yes, you have full control. You can update your pricing, seasonal rates, and availability at any time through your dedicated partner portal." 
+  },
+  { 
+    id: "04",
+    question: "Is there a listing fee?", 
+    answer: "We offer various subscription plans. While there are premium visibility tiers, we ensure every partner gets value with verified leads and dedicated support." 
+  }
 ];
 
 const valueProps = [
@@ -127,8 +146,6 @@ const valueProps = [
 ];
 
 // --- COMPONENTS ---
-
-// --- SUB-COMPONENTS ---
 
 const GridBackground = () => (
   <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -143,77 +160,69 @@ const GridBackground = () => (
   </div>
 );
 
-const FloatingProp = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
-  <motion.div
-    initial={{ y: 0 }}
-    animate={{ y: [0, -15, 0] }}
-    transition={{ duration: 4, repeat: Infinity, delay, ease: "easeInOut" }}
-    className={`absolute hidden lg:block ${className}`}
-  >
-    {children}
-  </motion.div>
-);
-
 const PricingCard = ({ plan }: { plan: typeof pricingPlans[0] }) => {
   const discount = Math.round(((plan.mrp - plan.price) / plan.mrp) * 100);
   
   return (
     <motion.div
       whileHover={{ y: -10 }}
-      className={`relative h-full flex flex-col p-8 rounded-[32px] bg-white border ${plan.popular ? 'border-2 ring-1 ring-pink-500 shadow-2xl scale-105 z-10' : 'border-slate-100 shadow-sm hover:shadow-xl'}`}
-      style={{
-        borderImageSource: plan.popular ? 'linear-gradient(to right, #ef4444, #ec4899, #8b5cf6, #3b82f6)' : 'none',
-        borderImageSlice: plan.popular ? 1 : 'none'
-      }}
+      className={`relative h-full ${plan.popular ? 'scale-105 z-10' : ''}`}
     >
-      <div className="absolute top-6 right-6">
-        <span className={`${gradientStyle} text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg`}>
-          Save {discount}%
-        </span>
-      </div>
-
-      <div className="mb-8 overflow-visible">
+      <div className={`h-full flex flex-col p-8 rounded-[32px] bg-white relative ${plan.popular ? 'shadow-2xl shadow-pink-500/20' : 'border border-slate-100 shadow-sm hover:shadow-xl'}`}>
         {plan.popular && (
-          <div className="flex items-center gap-1.5 text-pink-600 font-bold text-[10px] uppercase tracking-widest mb-3">
-             <Star size={12} fill="currentColor" /> MOST POPULAR
-          </div>
+          <div className={`absolute -inset-[2px] rounded-[34px] -z-10 ${gradientStyle}`}></div>
         )}
-        <h3 className="text-xl font-bold text-slate-900 leading-tight mb-4">{plan.name}</h3>
-        <div className="space-y-1">
-          <p className="text-sm text-slate-400 line-through font-medium leading-none">₹{plan.mrp.toLocaleString()}</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-extrabold text-slate-900 tracking-tighter">₹{plan.price.toLocaleString()}</span>
-            <span className="text-slate-500 text-xs font-medium uppercase tracking-widest">/ yr</span>
-          </div>
-        </div>
-      </div>
 
-      <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-        <div className="flex items-center gap-2 mb-1">
-          <Zap size={14} className="text-pink-500 fill-pink-500" />
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Monthly Yield</span>
+        <div className="absolute top-6 right-6">
+          <span className={`${gradientStyle} text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg`}>
+            Save {discount}%
+          </span>
         </div>
-        <p className="text-xs font-bold text-slate-900">{plan.leads}</p>
-      </div>
 
-      <div className="flex-grow space-y-4 mb-10">
-        {plan.features.map((feature, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${plan.popular ? 'bg-pink-50 text-pink-500' : 'bg-slate-50 text-slate-400'}`}>
-              <Check size={12} strokeWidth={3} />
+        <div className="mb-8 overflow-visible">
+          {plan.popular && (
+            <div className="flex items-center gap-1.5 text-pink-600 font-bold text-[10px] uppercase tracking-widest mb-3">
+               <Star size={12} fill="currentColor" /> MOST POPULAR
             </div>
-            <span className="text-sm font-medium text-slate-600 leading-tight">{feature}</span>
+          )}
+          <h3 className="text-xl font-bold text-slate-900 leading-tight mb-4">{plan.name}</h3>
+          <div className="space-y-1">
+            <p className="text-sm text-slate-400 line-through font-medium leading-none">₹{Math.round(plan.mrp / 365).toLocaleString()}</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-extrabold text-slate-900 tracking-tighter">₹{Math.round(plan.price / 365).toLocaleString()}</span>
+              <span className="text-slate-500 text-xs font-medium uppercase tracking-widest">/ day</span>
+            </div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Billed Annually</p>
           </div>
-        ))}
-      </div>
+        </div>
 
-      <button className={`w-full py-4 rounded-full text-sm font-bold uppercase tracking-widest transition-all ${
-        plan.popular 
-          ? `${gradientStyle} text-white shadow-lg shadow-pink-500/20 hover:scale-[1.02] hover:shadow-pink-500/40`
-          : 'bg-slate-900 text-white hover:bg-slate-800'
-      }`}>
-        {plan.cta}
-      </button>
+        <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+          <div className="flex items-center gap-2 mb-1">
+            <Zap size={14} className="text-pink-500 fill-pink-500" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Lead Capacity</span>
+          </div>
+          <p className="text-xs font-bold text-slate-900">{plan.leads}</p>
+        </div>
+
+        <div className="flex-grow space-y-4 mb-10">
+          {plan.features.map((feature, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${plan.popular ? 'bg-pink-50 text-pink-500' : 'bg-slate-50 text-slate-400'}`}>
+                <Check size={12} strokeWidth={3} />
+              </div>
+              <span className="text-sm font-medium text-slate-600 leading-tight">{feature}</span>
+            </div>
+          ))}
+        </div>
+
+        <button className={`w-full py-4 rounded-full text-sm font-bold uppercase tracking-widest transition-all ${
+          plan.popular 
+            ? `${gradientStyle} text-white shadow-lg shadow-pink-500/20 hover:scale-[1.02] hover:shadow-pink-500/40`
+            : 'bg-slate-900 text-white hover:bg-slate-800'
+        }`}>
+          {plan.cta}
+        </button>
+      </div>
     </motion.div>
   );
 };
@@ -221,13 +230,25 @@ const PricingCard = ({ plan }: { plan: typeof pricingPlans[0] }) => {
 const FaqItem = ({ item }: { item: typeof faqs[0] }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-sm mb-4">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className={`border border-slate-100 rounded-[32px] overflow-hidden bg-white transition-all duration-300 ${isOpen ? 'shadow-2xl shadow-slate-200/50 ring-1 ring-slate-100' : 'hover:shadow-lg'}`}
+    >
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-6 text-left flex items-center justify-between hover:bg-slate-50 transition-colors"
+        className="w-full p-6 md:p-9 text-left flex items-center justify-between group"
       >
-        <span className="text-sm md:text-base font-bold text-slate-800 leading-tight">{item.question}</span>
-        <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <div className="flex items-center gap-4 md:gap-8">
+          <span className="text-slate-300 font-bold text-[10px] md:text-xs tracking-tighter shrink-0">{item.id}</span>
+          <span className="text-base md:text-lg font-black text-slate-800 tracking-tight leading-tight group-hover:text-pink-600 transition-colors">
+            {item.question}
+          </span>
+        </div>
+        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 ${isOpen ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
+          <ChevronDown size={16} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -235,15 +256,16 @@ const FaqItem = ({ item }: { item: typeof faqs[0] }) => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="p-6 pt-0 text-slate-500 text-sm md:text-base font-medium leading-relaxed">
+            <div className="px-6 md:px-9 pb-8 md:pb-12 pt-0 ml-11 md:ml-20 text-slate-500 text-base md:text-xl font-medium leading-relaxed max-w-2xl">
               {item.answer}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 
@@ -251,49 +273,42 @@ export default function PricingPage() {
   return (
     <div className="bg-slate-50 min-h-screen text-slate-900 selection:bg-pink-500 selection:text-white font-sans antialiased">
       
-      {/* 1. HERO HEADER */}
-      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 bg-white overflow-hidden border-b border-slate-100">
+      {/* 1. BRAND-ALIGNED COMPACT HERO */}
+      <section className="relative py-8 bg-white overflow-hidden border-b border-slate-50">
         <GridBackground />
-        
-        {/* Animated Props */}
-        <FloatingProp delay={0} className="top-1/4 left-[10%] opacity-20 text-red-500"><Star size={48} className="fill-current" /></FloatingProp>
-        <FloatingProp delay={1} className="top-1/3 right-[15%] opacity-20 text-blue-500"><Zap size={40} className="fill-current" /></FloatingProp>
-        <FloatingProp delay={2} className="bottom-1/4 left-[15%] opacity-20 text-purple-500"><ShieldCheck size={36} className="fill-current" /></FloatingProp>
-        <FloatingProp delay={1.5} className="bottom-1/3 right-[10%] opacity-20 text-pink-500"><Plus size={32} className="rotate-45" /></FloatingProp>
-
-        {/* Subtle Background Glows */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-red-500/5 rounded-full blur-[120px] -z-10"></div>
-        <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[100px] -z-10"></div>
-        
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center relative z-10">
+        <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="flex justify-center mb-10">
-               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] border border-slate-200">
-                  <Star size={12} className="text-pink-500 fill-pink-500" /> Trusted by 500+ venues across India
-               </span>
+            <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-pink-50 rounded-full text-pink-500 text-[10px] font-black uppercase tracking-[0.2em] border border-pink-100">
+               <Zap size={12} className="fill-current text-pink-500" /> Grow Your Wedding & Event Business
             </div>
-            <h1 className="text-5xl md:text-8xl font-extrabold text-[#0F172A] leading-[1] mb-12 tracking-tighter">
-               Choose the <span className={textGradientStyle}>Right Plan</span> <br /> 
-               for Your Venue
+
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-[900] text-[#0F172A] flex flex-col items-center justify-center gap-2 md:gap-4 mb-8 tracking-tighter uppercase leading-[1.1]">
+               <span className="text-center">Advertise Your Venue</span>
+               <div className="flex items-center justify-center gap-3 md:gap-6 mt-2">
+                  <span className="text-xl md:text-4xl font-black text-slate-300 italic lowercase tracking-tight">on</span> 
+                  <span className="pd-logo text-3xl md:text-6xl lg:text-8xl">PartyDial</span>
+               </div>
             </h1>
-            <p className="text-lg md:text-2xl text-slate-500 font-medium mb-16 max-w-2xl mx-auto leading-relaxed">
-              Get verified event inquiries and grow your bookings with PartyDial.
+            
+            <p className="text-lg md:text-xl text-slate-500 font-bold mb-8 max-w-4xl mx-auto leading-relaxed">
+              India&apos;s No.1 Local Search Engine for Event Venues. Join thousands of partners getting direct leads and high-quality inquiries every day.
             </p>
+
             <div className="flex justify-center">
-              <Link href="/signup" className={`${gradientStyle} text-white px-20 py-6 rounded-full text-base font-bold uppercase tracking-widest shadow-2xl shadow-pink-500/30 hover:scale-110 hover:shadow-pink-500/50 transition-all flex items-center gap-3 group`}>
-                Get Started <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
-              </Link>
+               <button className={`${gradientStyle} text-white px-14 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl shadow-pink-500/20 hover:scale-[1.05] active:scale-95`}>
+                  Start Getting Enquiries
+               </button>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* 2. PRICING SECTION (MAIN) */}
-      <section className="py-24 md:py-36 px-6 lg:px-12">
+      <section className="py-12 md:py-20 px-6 lg:px-12 bg-white">
         <div className="max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {pricingPlans.map((plan) => (
@@ -303,58 +318,100 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* 3. FEATURE COMPARISON TABLE */}
-      <section className="py-24 bg-white border-y border-slate-100 overflow-hidden">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
-          <div className="text-center mb-20 uppercase">
-             <span className="text-pink-500 text-[11px] font-black tracking-[0.4em] block mb-4">Deep Dive</span>
-             <h2 className="text-3xl md:text-5xl font-extrabold text-[#0F172A] leading-tight">Plan Comparison</h2>
+      {/* 3. GOALS SECTION: HELP YOU ACHIEVE YOUR GOALS */}
+      <section className="py-16 bg-slate-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+          <div className="text-center mb-12">
+             <h2 className="text-4xl md:text-5xl font-[900] text-[#0F172A] uppercase tracking-tighter mb-4 flex items-center justify-center gap-4">
+                Help You Achieve 
+                <span className="pd-logo text-3xl md:text-5xl">PartyDial</span> 
+                Goals
+             </h2>
+             <p className="text-lg text-slate-500 font-bold max-w-2xl mx-auto">
+                Our platform is designed with one mission: to transform your venue into a lead-generation machine.
+             </p>
           </div>
-          
-          <div className="overflow-x-auto pb-12 rounded-[32px] border border-slate-100 bg-white shadow-sm">
-            <div className="min-w-[1200px]">
-               <table className="w-full border-collapse">
-                 <thead>
-                   <tr>
-                     <th className="sticky left-0 z-20 p-8 text-left bg-slate-50 border-b-2 border-slate-100 min-w-[200px]">
-                       <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Tiers & Features</span>
-                     </th>
-                     {pricingPlans.map((plan) => (
-                       <th key={plan.id} className={`p-8 text-center border-b-2 border-slate-100 ${plan.popular ? 'bg-pink-50/30' : 'bg-slate-50'}`}>
-                         <div className="text-[11px] font-black text-slate-900 uppercase tracking-tighter mb-1">{plan.name}</div>
-                         <div className="text-sm font-bold text-pink-500 italic leading-none">₹{plan.price.toLocaleString()}</div>
-                       </th>
-                     ))}
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-50">
-                    {[
-                      { label: "Leads per month", vals: ["20-30", "30-50", "60-90", "100-140", "150-220", "220-300", "300-450", "500+"] },
-                      { label: "Visibility level", vals: ["Basic", "Improved", "Priority", "Featured", "Premium", "Top City", "High Priority", "Highest"] },
-                      { label: "Lead priority", vals: ["Standard", "Standard", "High", "High", "Urgent", "Urgent", "Critical", "Top Priority"] },
-                      { label: "Analytics", vals: ["None", "Basic", "Standard", "Advanced", "Advanced", "Full", "Enterprise", "Custom"] },
-                      { label: "Support type", vals: ["Email", "Email", "Priority", "Priority", "Dedicated", "Dedicated", "A/C Mgr", "A/C Mgr"] },
-                      { label: "Placement level", vals: ["Standard", "Standard", "Featured", "Featured", "Premium", "Prime", "Elite", "Exclusive"] },
-                    ].map((row, i) => (
-                      <tr key={i} className="group hover:bg-slate-50 transition-colors">
-                        <td className="sticky left-0 z-10 p-8 bg-white group-hover:bg-slate-50 font-bold text-sm text-slate-700">{row.label}</td>
-                        {row.vals.map((val, idx) => (
-                          <td key={idx} className="p-8 text-center text-xs font-medium text-slate-500">{val}</td>
-                        ))}
-                      </tr>
-                    ))}
-                 </tbody>
-               </table>
-            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+             {[
+                {
+                   icon: <Eye size={32} className="text-pink-500" />,
+                   title: "Dominant Visibility",
+                   desc: "Get seen by 1.8Cr+ active buyers specifically searching for premium venues in your city."
+                },
+                {
+                   icon: <Zap size={32} className="text-purple-500" />,
+                   title: "Instant Conversion",
+                   desc: "Verified high-intent inquiries delivered via SMS & Dashboard for immediate response."
+                },
+                {
+                   icon: <ShieldCheck size={32} className="text-blue-500" />,
+                   title: "Elite Brand Trust",
+                   desc: "Earn the official 'Verified Partner' badge to build instant credibility with every search."
+                }
+             ].map((goal, idx) => (
+                <motion.div 
+                   key={idx}
+                   initial={{ opacity: 0, y: 20 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   viewport={{ once: true }}
+                   transition={{ delay: idx * 0.1 }}
+                   className="p-10 bg-white rounded-[40px] border border-slate-100 shadow-xl hover:shadow-2xl transition-all group"
+                >
+                   <div className="w-16 h-16 rounded-[24px] bg-slate-50 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-inner">
+                      {goal.icon}
+                   </div>
+                   <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">{goal.title}</h3>
+                   <p className="text-slate-500 font-bold leading-relaxed">{goal.desc}</p>
+                </motion.div>
+             ))}
           </div>
         </div>
       </section>
 
-      {/* 4. VALUE SECTION */}
-      <section className="py-24 md:py-36 px-6 lg:px-12 bg-slate-50">
+      {/* 4. PLATFORM FEATURES SECTION */}
+      <section className="py-16 bg-white border-y border-slate-100 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-12 uppercase">
+             <span className="text-blue-500 text-[11px] font-black tracking-[0.4em] block mb-2">Capabilities</span>
+             <h2 className="text-3xl md:text-5xl font-extrabold text-[#0F172A] leading-tight tracking-tight">Platform Features</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { id: 1, title: "Unlimited Leads", desc: "No caps or limits. Receive every single inquiry that matches your venue's capacity and location.", icon: <Zap className="text-yellow-500" /> },
+              { id: 2, title: "WhatsApp Direct", desc: "Get instantly notified on WhatsApp the moment a customer submits an inquiry. Connect in seconds.", icon: <MessageSquare className="text-emerald-500" /> },
+              { id: 3, title: "Advanced Analytics", desc: "Monitor profile views, lead conversion rates, and seasonal trends with our comprehensive dashboard.", icon: <BarChart3 className="text-blue-500" /> },
+              { id: 4, title: "Priority Verification", desc: "Every inquiry is pre-verified with OTP and intent checks to ensure you only speak with serious bookers.", icon: <ShieldCheck className="text-pink-500" /> },
+              { id: 5, title: "Featured Listings", desc: "Appear at the top of search results in your city area to capture the maximum volume of customer traffic.", icon: <Target className="text-purple-500" /> },
+              { id: 6, title: "Dedicated Support", desc: "Premium plans include a dedicated success manager to help optimize your profile and boost your closure rates.", icon: <Users className="text-orange-500" /> },
+            ].map((feature, i) => (
+              <motion.div
+                key={feature.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="p-10 rounded-[40px] bg-slate-50 border border-slate-100 hover:border-pink-200 hover:bg-white hover:shadow-2xl hover:shadow-pink-500/5 transition-all group"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                  {React.cloneElement(feature.icon as React.ReactElement<any>, { size: 28 })}
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 tracking-tight">{feature.title}</h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. VALUE SECTION */}
+      <section className="py-16 md:py-24 px-6 lg:px-12 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20 uppercase">
-             <h2 className="text-3xl md:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-none italic uppercase">Why Choose <span className={textGradientStyle}>PartyDial?</span></h2>
+          <div className="text-center mb-12 uppercase flex flex-col md:flex-row items-center justify-center gap-4">
+             <h2 className="text-3xl md:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-none italic uppercase">Why Choose</h2>
+             <span className="pd-logo text-4xl md:text-7xl">PartyDial</span>
+             <span className="text-3xl md:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-none italic uppercase">?</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
@@ -378,77 +435,65 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* 6. FAQ SECTION (OPTIMIZED) */}
+      <section className="py-24 md:py-40 px-6 bg-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-slate-50/50 -z-10 translate-x-1/2 rounded-full blur-3xl opacity-50"></div>
+        
+         <div className="max-w-[1400px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.5fr] gap-16 md:gap-24 items-start">
+               
+               {/* Left Column: Info & CTA */}
+               <div className="lg:sticky lg:top-24">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 bg-slate-50 rounded-full text-blue-600 text-[10px] font-black uppercase tracking-[0.3em] mb-10 border border-slate-100">
+                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></span>
+                       Knowledge Base
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-[900] text-[#0F172A] leading-[1.0] tracking-[-0.04em] uppercase mb-8">
+                       Curious <br /> About <br /> <span className={textGradientStyle}>Growth?</span>
+                    </h2>
+                    
+                    <p className="text-base md:text-lg text-slate-500 font-bold max-w-sm mb-12 leading-relaxed">
+                       Everything you need to know about the most powerful event engine in the country.
+                    </p>
 
-      {/* 6. FAQ SECTION */}
-      <section className="py-24 md:py-36 px-6 bg-slate-50">
-         <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-20 uppercase">
-               <span className="text-pink-500 text-[11px] font-black tracking-[0.4em] block mb-4">Support Hub</span>
-               <h2 className="text-3xl md:text-5xl font-extrabold text-[#0F172A] leading-tight tracking-tight">Got Questions?</h2>
-            </div>
-            
-            <div className="space-y-4">
-              {faqs.map((faq, i) => (
-                <FaqItem key={i} item={faq} />
-              ))}
+                    {/* Doubts Card */}
+                    <div className="max-w-md relative group">
+                       <div className="absolute -inset-1 bg-gradient-to-r from-slate-900 to-slate-800 rounded-[36px] blur opacity-10 group-hover:opacity-20 transition duration-500"></div>
+                       <div className="relative bg-slate-950 rounded-[24px] p-8 overflow-hidden shadow-2xl">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 blur-[60px] rounded-full -translate-y-12 translate-x-12"></div>
+                          
+                          <h4 className="text-white text-[9px] font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-2 opacity-80">
+                             Still Have Doubts?
+                          </h4>
+                          
+                          <p className="text-slate-400 text-xs md:text-sm font-bold leading-relaxed mb-8 pr-4">
+                             Our partner success team is available 24/7 to help you dominate your city.
+                          </p>
+                          
+                          <button className="bg-[#FF415E] text-white px-8 py-3.5 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-[#E63955] transition-all hover:scale-[1.03] active:scale-[0.98] shadow-xl shadow-pink-500/30">
+                             Get Expert Help
+                          </button>
+                       </div>
+                    </div>
+                  </motion.div>
+               </div>
+
+               {/* Right Column: FAQ Items */}
+               <div className="space-y-6 md:space-y-8">
+                  {faqs.map((faq, i) => (
+                    <FaqItem key={i} item={faq} />
+                  ))}
+               </div>
+
             </div>
          </div>
       </section>
-
-      {/* 7. FINAL CTA SECTION - PERFORMANCE OPTIMIZED */}
-      <section className="py-24 md:py-36 px-6 bg-white overflow-hidden relative">
-        <div className="max-w-[1440px] mx-auto lg:px-12 text-center relative z-10">
-           <div className="relative rounded-[80px] bg-slate-50 p-16 md:p-32 border border-slate-100 shadow-2xl overflow-hidden group bg-gradient-to-b from-slate-50 to-white">
-              
-              {/* Hardware-Accelerated Optimized Glow */}
-              <div 
-                className="absolute top-0 right-0 w-[400px] h-[400px] bg-pink-500/5 rounded-full blur-[100px] pointer-events-none transition-opacity duration-1000 group-hover:opacity-40"
-                style={{ willChange: 'opacity, transform' }}
-              ></div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                style={{ willChange: 'opacity, transform' }}
-              >
-                <h2 className="text-4xl md:text-8xl font-black text-[#0F172A] leading-[0.9] tracking-tighter italic uppercase mb-12">
-                   Start Receiving <br />
-                   <span className={textGradientStyle}>Event Bookings</span> Today
-                </h2>
-                
-                <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                   <Link href="/signup" className={`${gradientStyle} text-white px-20 py-6 rounded-full text-base font-bold uppercase tracking-widest shadow-2xl shadow-pink-500/20 hover:scale-[1.05] hover:shadow-pink-500/40 transition-all duration-300`}>
-                      Get Started
-                   </Link>
-                   <Link href="/contact" className="px-16 py-6 bg-white border-2 border-slate-200 text-slate-800 rounded-full text-base font-bold uppercase tracking-widest hover:bg-slate-50 transition-all duration-300">
-                      Talk to Sales
-                   </Link>
-                </div>
-                
-                <div className="mt-16 flex items-center justify-center gap-4 text-slate-400">
-                   <ShieldCheck size={20} />
-                   <span className="text-[11px] font-black uppercase tracking-widest leading-none">Safe · Secure · High Growth</span>
-                   <Zap size={20} />
-                </div>
-              </motion.div>
-           </div>
-        </div>
-      </section>
-
-      {/* MOBILE STICKY CTA */}
-      <div className="fixed bottom-6 left-6 right-6 z-[100] md:hidden">
-         <Link href="/signup" className={`${gradientStyle} flex items-center justify-between w-full p-4 text-white rounded-[32px] shadow-2xl border border-white/20 group`}>
-            <div className="pl-4">
-               <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-80 leading-none mb-1">Growth Awaits</div>
-               <div className="text-sm font-black italic uppercase leading-none tracking-tighter">Register Venue</div>
-            </div>
-            <div className="bg-white/10 p-4 rounded-2xl group-active:scale-95 transition-transform">
-               <ArrowRight size={20} />
-            </div>
-         </Link>
-      </div>
 
     </div>
   );

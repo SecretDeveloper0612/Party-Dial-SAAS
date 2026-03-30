@@ -103,12 +103,29 @@ export default function VendorDashboard() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const session = localStorage.getItem('auth_session');
-    if (!session) {
-      router.push('/login');
-    } else {
-      setIsAuthorized(true);
-    }
+    const checkAuth = async () => {
+      const session = localStorage.getItem('auth_session');
+      if (!session) {
+        // Try to recover session from Appwrite
+        try {
+          const { account } = await import('@/lib/appwrite');
+          const currentAccount = await account.get();
+          if (currentAccount) {
+            localStorage.setItem('user', JSON.stringify(currentAccount));
+            localStorage.setItem('auth_session', 'recovered-from-google');
+            setIsAuthorized(true);
+            return;
+          }
+        } catch (err) {
+          console.error('Session recovery failed on dashboard:', err);
+        }
+        router.push('/login');
+      } else {
+        setIsAuthorized(true);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   const handleLogout = async () => {

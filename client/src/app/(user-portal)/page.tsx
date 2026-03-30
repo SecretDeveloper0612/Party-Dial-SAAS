@@ -147,7 +147,35 @@ export default function Home() {
     { name: "Entertainment / Theme Parties", icon: "🦁", img: "/categories/kids.png" }
   ];
 
-  const venues = [
+  const [liveVenues, setLiveVenues] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTopVenues = async () => {
+      try {
+        const { databases } = await import('@/lib/appwrite');
+        const result = await databases.listDocuments('partydial_main_db', 'venues_profile');
+        
+        const mapped = result.documents.map(doc => ({
+          name: doc.venueName || "Unnamed Venue",
+          location: doc.landmark || doc.city || "India",
+          city: doc.city || "Unknown",
+          capacity: doc.capacity || "500-1000",
+          price: "₹1,500",
+          rating: 4.8,
+          reviews: 0,
+          img: "/venues/palace-hotel.png"
+        }));
+
+        setLiveVenues(mapped.slice(0, 3)); // Take top 3 for home page
+      } catch (err) {
+        console.error('Home: Failed to fetch live venues:', err);
+      }
+    };
+
+    fetchTopVenues();
+  }, []);
+
+  const staticVenues = [
     {
       name: "The Royal Ballroom",
       location: "South Delhi",
@@ -176,6 +204,8 @@ export default function Home() {
       img: "/venues/oceanic-resort.png"
     }
   ];
+
+  const displayVenues = liveVenues.length > 0 ? liveVenues : staticVenues;
 
   const steps = [
     { title: "Submit Requirement", desc: "Tell us about your event type, guest count, and budget.", icon: <Send className="text-white" size={24} /> },
@@ -421,7 +451,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {venues.map((venue, i) => (
+            {displayVenues.map((venue, i) => (
               <motion.div key={i} className="pd-card group overflow-hidden bg-white">
                 <div className="h-56 relative overflow-hidden">
                   <Image src={venue.img} alt={venue.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -437,11 +467,11 @@ export default function Home() {
                   <h3 className="text-lg font-black text-slate-900 mb-4">{venue.name}</h3>
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
-                      <p className="text-sm font-black text-slate-700">{venue.capacity} Pax</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pax</p>
+                      <p className="text-sm font-black text-slate-700">{venue.capacity}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Veg Price</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pricing From</p>
                       <p className="text-sm font-black text-pd-pink">{venue.price} <span className="text-[10px] text-slate-400">/plate</span></p>
                     </div>
                   </div>
