@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "PartnerApp",
+    "slug": "PartnerApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/app-logo.jpg",
+    "scheme": "partnerapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1a2e",
+        "foregroundImage": "./assets/images/app-logo.jpg",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.PartnerApp"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-full.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#F43F5E",
+          "dark": {
+            "backgroundColor": "#F43F5E"
+          }
+        }
+      ],
+      "expo-mail-composer"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
