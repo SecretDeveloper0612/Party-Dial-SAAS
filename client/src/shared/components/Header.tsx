@@ -168,20 +168,7 @@ export default function Header() {
               </motion.span>
             </AnimatePresence>
           </div>
-          <div className="flex items-center gap-3 md:gap-6 shrink-0">
-            <button 
-              onClick={() => setAuthModal({ isOpen: true, type: 'signin' })}
-              className="flex items-center gap-1.5 md:gap-2 hover:text-white/80 transition-opacity cursor-pointer text-[8px] sm:text-xs"
-            >
-              <User size={12} className="md:size-[14px]" /> <span>Sign In</span>
-            </button>
-            <div className="w-[1px] h-3 bg-white/20"></div>
-            <button 
-              onClick={() => setAuthModal({ isOpen: true, type: 'signup' })}
-              className="flex items-center gap-1.5 md:gap-2 hover:text-white/80 transition-opacity cursor-pointer text-[8px] sm:text-xs"
-            >
-              <UserPlus size={12} className="md:size-[14px]" /> <span>Sign Up</span>
-            </button>
+          <div className="flex items-center gap-3 md:gap-6 shrink-0 hidden">
           </div>
         </div>
       </div>
