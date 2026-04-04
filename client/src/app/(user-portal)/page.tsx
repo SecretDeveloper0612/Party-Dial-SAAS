@@ -179,12 +179,19 @@ export default function Home() {
           // Calculate counts per category (for now using venueType as a proxy or just randomizing for demo if field missing)
           const counts: Record<string, number> = {};
           categories.forEach(cat => {
-            // Logic: Count venues that might fit this category
-            // For now, if we don't have 'supportedEvents', we count venues where venueType fits or just show available pool
-            const matchCount = allDocs.filter((v: any) => 
-               v.venueType === cat.name || 
-               (v.description && v.description.toLowerCase().includes(cat.name.toLowerCase()))
-            ).length;
+            const matchCount = allDocs.filter((v: any) => {
+               // 1. Try to check the specific eventTypes field first (now that we have it from onboarding)
+               if (v.eventTypes) {
+                  try {
+                     const types = typeof v.eventTypes === 'string' ? JSON.parse(v.eventTypes) : v.eventTypes;
+                     if (Array.isArray(types) && types.includes(cat.name)) return true;
+                  } catch (e) {}
+               }
+               
+               // 2. Fallback to name or description (legacy or if not filled)
+               return v.venueType === cat.name || 
+                  (v.description && v.description.toLowerCase().includes(cat.name.toLowerCase()));
+            }).length;
             counts[cat.name] = matchCount;
           });
           setCategoryCounts(counts);
