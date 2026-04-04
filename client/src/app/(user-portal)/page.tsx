@@ -164,6 +164,8 @@ export default function Home() {
   const [liveVenues, setLiveVenues] = useState<any[]>([]);
   const displayVenues = liveVenues;
 
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+
   useEffect(() => {
     const fetchTopVenues = async () => {
       try {
@@ -172,7 +174,22 @@ export default function Home() {
         const result = await response.json();
         
         if (result.status === 'success' && result.data) {
-          const mapped = result.data.map((doc: any) => ({
+          const allDocs = result.data;
+          
+          // Calculate counts per category (for now using venueType as a proxy or just randomizing for demo if field missing)
+          const counts: Record<string, number> = {};
+          categories.forEach(cat => {
+            // Logic: Count venues that might fit this category
+            // For now, if we don't have 'supportedEvents', we count venues where venueType fits or just show available pool
+            const matchCount = allDocs.filter((v: any) => 
+               v.venueType === cat.name || 
+               (v.description && v.description.toLowerCase().includes(cat.name.toLowerCase()))
+            ).length;
+            counts[cat.name] = matchCount;
+          });
+          setCategoryCounts(counts);
+
+          const mapped = allDocs.map((doc: any) => ({
             id: doc.$id,
             name: doc.venueName || "Unnamed Venue",
             location: doc.landmark || doc.city || "India",
@@ -424,10 +441,14 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {categories.map((cat, i) => (
-              <Link href={`/categories?type=${cat.name.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
+              <Link href={`/venues?type=${cat.name.toLowerCase().replace(/\s+/g, '-')}`} key={i}>
                 <div className="border border-slate-100 rounded-lg overflow-hidden h-64 relative group cursor-pointer">
                   <Image src={cat.img} alt={cat.name} fill className="object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute inset-0 bg-black/40"></div>
+                  {/* Realtime Count Badge */}
+                  <div className="absolute top-4 right-4 bg-pd-red text-white px-3 py-1 rounded-full text-[10px] font-black group-hover:scale-110 transition-transform">
+                    {categoryCounts[cat.name] || 0} Venues
+                  </div>
                   <div className="absolute bottom-4 left-4">
                     <h3 className="text-white font-bold text-xs uppercase tracking-wider">{cat.name}</h3>
                   </div>
