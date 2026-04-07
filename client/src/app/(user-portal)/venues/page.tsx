@@ -20,7 +20,7 @@ import {
   Navigation,
   Check
 } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 
@@ -70,7 +70,7 @@ const getCapacityLabel = (capacity: any) => {
   return capacity?.toString() || "0";
 };
 
-export default function VenuesPage() {
+function VenuesContent() {
   const searchParams = useSearchParams();
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
@@ -180,7 +180,7 @@ export default function VenuesPage() {
         
         const fetchVenues = async () => {
           try {
-            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://127.0.0.1:5005/api';
+            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://party-dial-server-koo2.onrender.com/api';
             const response = await fetch(`${baseUrl}/venues`);
             const result = await response.json();
             
@@ -943,5 +943,17 @@ export default function VenuesPage() {
       </AnimatePresence>
 
     </div>
+  );
+}
+
+export default function VenuesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+      </div>
+    }>
+      <VenuesContent />
+    </Suspense>
   );
 }

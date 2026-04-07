@@ -24,7 +24,7 @@ const ReviewManager = ({ venueId, setReplyTarget, replyTarget, showToast }: Revi
     if (!venueId) return;
     setIsLoading(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5005/api';
+      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://party-dial-server-koo2.onrender.com/api';
       const response = await fetch(`${baseUrl}/venues/${venueId}/reviews`);
       const result = await response.json();
       if (result.status === 'success') {
@@ -84,7 +84,7 @@ const ReviewManager = ({ venueId, setReplyTarget, replyTarget, showToast }: Revi
     if (!replyTarget || !replyText.trim()) return;
     setIsSubmittingReply(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5005/api';
+      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://party-dial-server-koo2.onrender.com/api';
       const response = await fetch(`${baseUrl}/venues/reviews/${replyTarget.$id}/reply`, {
         method: 'PATCH',
         headers: {
@@ -110,7 +110,7 @@ const ReviewManager = ({ venueId, setReplyTarget, replyTarget, showToast }: Revi
   const handleDeleteReview = async (reviewId: string) => {
     setIsDeleting(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5005/api';
+      const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://party-dial-server-koo2.onrender.com/api';
       const response = await fetch(`${baseUrl}/venues/reviews/${reviewId}`, {
         method: 'DELETE',
       });

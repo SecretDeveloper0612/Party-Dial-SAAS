@@ -8,7 +8,7 @@ export const getAppwriteImageUrl = (fileId: string | any) => {
   
   // Use environment variables or hardcoded fallbacks
   // PROXY: Use our own server API to bypass any CORS / Platform / Permissions blocks
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5005/api';
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://party-dial-server-koo2.onrender.com/api';
   const bucketId = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || 'venues_photos';
   
   // Create a URL pointing to our proxy

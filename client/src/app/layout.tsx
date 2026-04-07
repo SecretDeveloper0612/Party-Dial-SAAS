@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./main.css";
 import Header from "@/shared/components/Header";
 import Footer from "@/shared/components/Footer";
@@ -19,7 +20,9 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <Header />
         {children}
-        <PopupInquiry />
+        <Suspense fallback={null}>
+          <PopupInquiry />
+        </Suspense>
         <Footer />
       </body>
     </html>

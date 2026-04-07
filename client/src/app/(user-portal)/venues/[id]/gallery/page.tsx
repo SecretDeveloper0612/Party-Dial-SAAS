@@ -30,7 +30,7 @@ export default function VenueGalleryPage() {
     const fetchVenue = async () => {
       setIsLoading(true);
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://127.0.0.1:5005/api';
+        const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://party-dial-server-koo2.onrender.com/api';
         const response = await fetch(`${baseUrl}/venues/${id}`);
         const result = await response.json();
 
