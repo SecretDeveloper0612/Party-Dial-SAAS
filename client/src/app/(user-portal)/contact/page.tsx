@@ -322,7 +322,7 @@ export default function ContactUs() {
               allowFullScreen={true} 
               loading="lazy" 
               referrerPolicy="no-referrer-when-downgrade"
-              className="grayscale group-hover:grayscale-0 transition-all duration-700"
+              className="w-full h-full border-0 transition-all duration-700"
             ></iframe>
           </motion.div>
         </div>

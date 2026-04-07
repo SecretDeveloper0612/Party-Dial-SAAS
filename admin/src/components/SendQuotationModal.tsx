@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X, CheckCircle2, Loader2, Users, Plus, Download, IndianRupee, ShieldCheck, Zap, Target
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
@@ -22,8 +22,16 @@ export default function SendQuotationModal({ isOpen, onClose, entityName, entity
   const [discountType, setDiscountType] = useState<'percent' | 'value'>('percent');
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [step, setStep] = useState(entityId === 'QUICK-QUOTE' ? 0 : 1);
+  const [step, setStep] = useState(0);
   const [selectedAccount, setSelectedAccount] = useState<string>("");
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep(entityId === 'QUICK-QUOTE' ? 0 : 1);
+      // If we are in QUICK-QUOTE but an account is already selected, we might want to stay on step 1?
+      // No, let's follow the prop logic.
+    }
+  }, [isOpen, entityId]);
 
   const accounts = [
     { id: "acc1", name: "Imperial Palace Resorts", city: "Gurgaon" },
@@ -127,13 +135,13 @@ export default function SendQuotationModal({ isOpen, onClose, entityName, entity
         
         // 1. BASE PLAN (Standard vs Offer)
         const stdRateStr = `Rs. ${activePlan?.mrpAnnual?.toLocaleString() || '0'}`;
-        p7.drawText(`${activePlan?.name || 'Standard Membership'} (Standard Rate)`, { x: width * 0.12, y: startY + 45, size: 16, font: normalFont, color: rgb(1, 1, 1) });
-        p7.drawText(stdRateStr, { x: width * 0.88 - normalFont.widthOfTextAtSize(stdRateStr, 16), y: startY + 45, size: 16, font: normalFont, color: rgb(1, 1, 1) });
+        p7.drawText(`${activePlan?.name || 'Standard Membership'} (Standard Rate)`, { x: width * 0.12, y: startY + 45, size: 16, font: normalFont, color: rgb(0, 0, 0) });
+        p7.drawText(stdRateStr, { x: width * 0.88 - normalFont.widthOfTextAtSize(stdRateStr, 16), y: startY + 45, size: 16, font: normalFont, color: rgb(0, 0, 0) });
 
         // Highlight Offer Price with extra spacing
-        p7.drawText(`Exclusive Partner Offer`, { x: width * 0.12, y: startY, size: 25, font, color: rgb(1, 1, 1) });
+        p7.drawText(`Exclusive Partner Offer`, { x: width * 0.12, y: startY, size: 25, font, color: rgb(0, 0, 0) });
         const baseRateStr = `Rs. ${baseValue.toLocaleString()}`;
-        p7.drawText(baseRateStr, { x: width * 0.88 - font.widthOfTextAtSize(baseRateStr, 25), y: startY, size: 25, font, color: rgb(1, 1, 1) });
+        p7.drawText(baseRateStr, { x: width * 0.88 - font.widthOfTextAtSize(baseRateStr, 25), y: startY, size: 25, font, color: rgb(0, 0, 0) });
 
         // 2. ADD-ONS BREAKDOWN
         let currentY = startY - rowHeight - 20;
@@ -141,9 +149,9 @@ export default function SendQuotationModal({ isOpen, onClose, entityName, entity
           selectedAddons.forEach((id) => {
             const a = addons.find(x => x.id === id);
             if (a) {
-              p7.drawText(`+ ${a.name}`, { x: width * 0.12, y: currentY, size: 20, font: normalFont, color: rgb(1, 1, 1) });
+              p7.drawText(`+ ${a.name}`, { x: width * 0.12, y: currentY, size: 20, font: normalFont, color: rgb(0, 0, 0) });
               const addRateStr = `Rs. ${a.price.toLocaleString()}`;
-              p7.drawText(addRateStr, { x: width * 0.88 - font.widthOfTextAtSize(addRateStr, 20), y: currentY, size: 20, font: normalFont, color: rgb(1, 1, 1) });
+              p7.drawText(addRateStr, { x: width * 0.88 - font.widthOfTextAtSize(addRateStr, 20), y: currentY, size: 20, font: normalFont, color: rgb(0, 0, 0) });
               currentY -= rowHeight;
             }
           });
@@ -152,17 +160,17 @@ export default function SendQuotationModal({ isOpen, onClose, entityName, entity
         // 3. DISCOUNT (IF ANY)
         if (discountAmount > 0) {
           currentY -= 10;
-          p7.drawText(`- Special Discount`, { x: width * 0.12, y: currentY, size: 20, font: normalFont, color: rgb(1, 1, 1) });
+          p7.drawText(`- Special Discount`, { x: width * 0.12, y: currentY, size: 20, font: normalFont, color: rgb(0, 0, 0) });
           const discStr = `- Rs. ${discountAmount.toLocaleString()}`;
-          p7.drawText(discStr, { x: width * 0.88 - font.widthOfTextAtSize(discStr, 20), y: currentY, size: 20, font: normalFont, color: rgb(1, 1, 1) });
+          p7.drawText(discStr, { x: width * 0.88 - font.widthOfTextAtSize(discStr, 20), y: currentY, size: 20, font: normalFont, color: rgb(0, 0, 0) });
           currentY -= rowHeight;
         }
 
         // 4. GRAND TOTAL
         currentY -= 30;
-        p7.drawText(`GRAND TOTAL INVESTMENT`, { x: width * 0.12, y: currentY, size: 32, font, color: rgb(1, 1, 1) });
+        p7.drawText(`GRAND TOTAL INVESTMENT`, { x: width * 0.12, y: currentY, size: 32, font, color: rgb(0, 0, 0) });
         const totalStr = `Rs. ${grandTotal.toLocaleString()}`;
-        p7.drawText(totalStr, { x: width * 0.88 - font.widthOfTextAtSize(totalStr, 32), y: currentY, size: 32, font, color: rgb(1, 1, 1) });
+        p7.drawText(totalStr, { x: width * 0.88 - font.widthOfTextAtSize(totalStr, 32), y: currentY, size: 32, font, color: rgb(0, 0, 0) });
 
         // 5. TOTAL SAVINGS LINE
         const totalSavings = ((activePlan?.mrpAnnual || 0) - (activePlan?.annual || 0)) + discountAmount;
@@ -174,22 +182,28 @@ export default function SendQuotationModal({ isOpen, onClose, entityName, entity
             y: currentY, 
             size: 14, 
             font, 
-            color: rgb(1, 1, 1) 
+            color: rgb(0, 0, 0) 
           });
         }
       }
 
       const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `Proposal_${currentEntityName.replace(/\s+/g, '_')}.pdf`;
+      
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
+      // Revoke the URL after short delay to ensure browser handled it
+      setTimeout(() => URL.revokeObjectURL(url), 100);
       setLoading(false);
     } catch (error) {
-      console.error(error);
-      alert("Error producing the Template-based Proposal.");
+      console.error("PDF Production Error:", error);
+      alert("System Dossier Generation Error: The Template-based Proposal could not be produced at this time.");
       setLoading(false);
     }
   };
@@ -265,8 +279,8 @@ export default function SendQuotationModal({ isOpen, onClose, entityName, entity
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-2 italic">Dossier Generated Successfully</p>
                       </div>
                       <div className="flex items-center gap-4">
-                        <button onClick={downloadPDF} className="px-10 py-5 bg-slate-900 text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center gap-3">
-                          {loading ? <Loader2 className="animate-spin" /> : <Download size={18} />} <span>Download Strategic Plan</span>
+                        <button onClick={downloadPDF} disabled={loading} className="px-10 py-5 bg-slate-900 text-white rounded-2xl text-xs font-bold uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                          {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />} <span>Download Strategic Plan</span>
                         </button>
                         <button onClick={resetForm} className="px-8 py-5 bg-white border border-slate-200 text-slate-600 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-3">
                           <Plus size={18} /> <span>Create New</span>

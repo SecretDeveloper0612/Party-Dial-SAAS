@@ -180,6 +180,7 @@ export default function CompleteProfilePage() {
         amenities: JSON.stringify(selectedAmenities),
         eventTypes: JSON.stringify(selectedEventTypes),
         landmark,
+        location: landmark, // Map landmark to profile address (location)
         contactNumber: userData?.phone || '',
         city: userData?.city || 'Haldwani',
         state: userData?.state || 'Uttarakhand',
@@ -340,6 +341,22 @@ export default function CompleteProfilePage() {
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
                   />
+                  {landmark && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="mt-4 rounded-[20px] overflow-hidden border-2 border-slate-100 shadow-sm"
+                    >
+                      <iframe 
+                        width="100%" 
+                        height="200" 
+                        style={{ border: 0 }} 
+                        loading="lazy" 
+                        allowFullScreen 
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(landmark + ' ' + (userData?.city || 'Haldwani'))}&output=embed`}
+                      ></iframe>
+                    </motion.div>
+                  )}
                </section>
 
                {/* Operating Hours */}

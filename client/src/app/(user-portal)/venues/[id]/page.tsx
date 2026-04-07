@@ -654,8 +654,8 @@ export default function VenueDetailPage() {
               <h2 className="text-xl font-black text-slate-900 mb-8 border-l-4 border-slate-900 pl-4">Location & Map</h2>
                <div className="w-full h-80 bg-slate-200 rounded-[32px] overflow-hidden relative shadow-xl">
                  <iframe 
-                   src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.name + ' ' + (venue.location || venue.city))}&output=embed`}
-                   className="w-full h-full border-0 grayscale opacity-90 contrast-125"
+                   src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.name + ' ' + (venue.landmark || venue.location || venue.city))}&output=embed`}
+                   className="w-full h-full border-0 rounded-[32px] shadow-sm hover:shadow-md transition-shadow"
                    allowFullScreen
                    loading="lazy"
                    referrerPolicy="no-referrer-when-downgrade"
